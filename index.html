@@ -65,6 +65,31 @@
       border-radius:10px;
     }
   </style>
+  async function savePDF() {
+  const file = document.getElementById("pdfFile").files[0];
+  if (!file) return alert("Pehle PDF select karo.");
+
+  const pdfBytes = await file.arrayBuffer();
+  const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+  const pages = pdfDoc.getPages();
+  const firstPage = pages[0];
+
+  firstPage.drawText("Edited with EditPDFFree", {
+    x: 50,
+    y: 50,
+    size: 18
+  });
+
+  const bytes = await pdfDoc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "edited.pdf";
+  link.click();
+}
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 </head>
 
 <body>
@@ -73,9 +98,7 @@
 
 <div class="card">
   <h3>📄 PDF Editor</h3>
-  <input type="file" id="pdfFile" accept=".pdf">
-  <button onclick="openPDF()">Open PDF</button>
-</div>
+  <button onclick="openPDF()">Open PDF Editor</button>
 
 <div class="card">
   <h3>🖼️ Image Editor</h3>
@@ -86,8 +109,7 @@
 <div class="card">
   <h3>📉 PDF Size Reducer</h3>
   <input type="file" accept=".pdf">
-  <button onclick="alert('PDF Reducer Coming in Part 3')">Reduce PDF</button>
-</div>
+  <button onclick="alert('PDF Reducer Coming Soon')">Open PDF Reducer</button>
 
 <div class="card">
   <h3>📦 Image Size Reducer</h3>
@@ -108,7 +130,8 @@
 </div>
 <script>
 let canvas = document.getElementById("canvas");
-let ctx = canvas.getContext("2d");
+  
+let<button onclick="savePDF()">Save Edited PDF</button> ctx = canvas.getContext("2d");
 let img = new Image();
 let rotation = 0;
 
@@ -161,9 +184,21 @@ async function extractText() {
     }
 
 // PDF Reducer (Basic)
-function reducePDF() {
-  alert("PDF Compress feature ready.");
-}
+async function reducePDF() {
+  const file = document.querySelector('input[accept=".pdf"]').files[0];
+  if (!file) return alert("Pehle PDF select karo.");
+
+  const pdfBytes = await file.arrayBuffer();
+  const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+
+  const bytes = await pdfDoc.save();
+  const blob = new Blob([bytes], { type: "application/pdf" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "compressed.pdf";
+  link.click();
+  }
 
 // Image Reducer
 function reduceImage() {
