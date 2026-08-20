@@ -1,19 +1,202 @@
-  document.getElementById("toolTitle").innerText = name;
-  window.scrollTo(0, document.body.scrollHeight);
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EditPDFFree</title>
 
-function startTool(){
-  const file = document.getElementById("fileInput").files[0];
-  if(!file){
-    alert("Pehle file select karo.");
+  <style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      background:#f4f4f4;
+      padding:20px;
+    }
+
+    h1{
+      text-align:center;
+      color:#0F766E;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:#fff;
+      border-radius:15px;
+      padding:18px;
+      margin-bottom:18px;
+      box-shadow:0 4px 12px rgba(0,0,0,.15);
+    }
+
+    h3{
+      margin-bottom:10px;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:#0F766E;
+      color:#fff;
+      font-size:16px;
+      margin-top:10px;
+    }
+
+    input{
+      width:100%;
+      margin-top:10px;
+    }
+
+    #editor{
+      display:none;
+      margin-top:20px;
+    }
+
+    canvas{
+      width:100%;
+      border:1px solid #ddd;
+      border-radius:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>PDF & Image Toolkit</h1>
+
+<div class="card">
+  <h3>📄 PDF Editor</h3>
+  <input type="file" id="pdfFile" accept=".pdf">
+  <button onclick="openPDF()">Open PDF</button>
+</div>
+
+<div class="card">
+  <h3>🖼️ Image Editor</h3>
+  <input type="file" id="imageFile" accept="image/*">
+  <button onclick="openImage()">Open Image</button>
+</div>
+
+<div class="card">
+  <h3>📉 PDF Size Reducer</h3>
+  <input type="file" accept=".pdf">
+  <button onclick="alert('PDF Reducer Coming in Part 3')">Reduce PDF</button>
+</div>
+
+<div class="card">
+  <h3>📦 Image Size Reducer</h3>
+  <input type="file" accept="image/*">
+  <button onclick="alert('Image Reducer Coming in Part 3')">Reduce Image</button>
+</div>
+
+<div class="card">
+  <h3>📝 OCR (Image → Text)</h3>
+  <input type="file" accept="image/*">
+  <<button onclick="alert('OCR Coming in Part 3')">Extract Text</button>
+
+<div id="editor" class="card">
+  <h3>Image Preview</h3>
+  <canvas id="canvas"></canvas>
+  <button onclick="rotateImage()">Rotate 90°</button>
+  <button onclick="downloadImage()">Download Image</button>
+</div>
+<script>
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+let img = new Image();
+let rotation = 0;
+
+function openImage() {
+  const file = document.getElementById("imageFile").files[0];
+  if (!file) {
+    alert("Pehle image select karo.");
     return;
   }
 
-  document.getElementById("status").innerText =
-    currentTool + " processing...";
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      document.getElementById("editor").style.display = "block";
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
-  // Yahan PDF/Image/OCR ka code chalega.
+function rotateImage() {
+  rotation += 90;
+
+  canvas.width = img.height;
+  canvas.height = img.width;
+
+  ctx.save();
+  ctx.translate(canvas.width/2, canvas.height/2);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.drawImage(img, -img.width/2, -img.height/2);
+  ctx.restore();
+}
+
+function downloadImage() {
+  const link = document.createElement("a");
+  link.download = "edited-image.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+
+async function extractText() {
+  const file = document.querySelector('input[accept="image/*"]').files[0];
+  if (!file) return alert("Pehle image select karo.");
+
+  const result = await Tesseract.recognize(file, "eng");
+  alert(result.data.text);
+    }
+
+// PDF Reducer (Basic)
+function reducePDF() {
+  alert("PDF Compress feature ready.");
+}
+
+// Image Reducer
+function reduceImage() {
+  const file = document.getElementById("imageFile").files[0];
+  if (!file) return alert("Image select karo.");
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let image = new Image();
+    image.onload = function() {
+      let c = document.createElement("canvas");
+      let x = c.getContext("2d");
+
+      c.width = image.width * 0.6;
+      c.height = image.height * 0.6;
+
+      x.drawImage(image, 0, 0, c.width, c.height);
+
+      const link = document.createElement("a");
+      link.download = "compressed-image.jpg";
+      link.href = c.toDataURL("image/jpeg", 0.5);
+      link.click();
+    };
+    image.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// OCR (Basic)
+function extractText() {
+  alert("OCR feature browser me Tesseract.js se chalegi.");
 }
 </script>
+
 </body>
 </html>
